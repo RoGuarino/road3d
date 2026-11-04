@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Road Analyzer prima e dopo</title>
+<title>Road Analyzer sul tavolo</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
 <style>
@@ -36,16 +36,16 @@ model-viewer{width:100%;height:100%}
 
 <main class="wrap">
   <div class="brand"><i></i>EVOLVE · Road Analyzer</div>
-  <h1>Prima e <em>dopo</em> l'analisi</h1>
-  <p>A sinistra il fotogramma della dashcam, a destra lo stesso fotogramma con i danni trovati da Road Analyzer. Dal telefono puoi metterli sul tavolo davanti a te.</p>
+  <h1>La strada <em>sul tavolo</em></h1>
+  <p>Il fotogramma della dashcam steso sul tavolo. Dopo un istante, dai punti dove Road Analyzer ha trovato un danno si alzano i riquadri con classe, confidenza e gravità.</p>
   <div class="seg" role="group" aria-label="Scegli la strada">
-    <button id="s-res" data-m="prima_dopo_residenziale" aria-pressed="true">Strada residenziale</button>
-    <button id="s-inc" data-m="prima_dopo_incrocio" aria-pressed="false">Incrocio</button>
+    <button id="s-res" data-m="tavolo_residenziale" aria-pressed="true">Strada residenziale</button>
+    <button id="s-inc" data-m="tavolo_incrocio" aria-pressed="false">Incrocio</button>
   </div>
   <div class="viewer">
-    <model-viewer id="mv" alt="Due pannelli: fotogramma originale e fotogramma con le rilevazioni"
-      camera-controls touch-action="pan-y" camera-orbit="0deg 75deg 0.85m" field-of-view="32deg"
-      min-camera-orbit="-70deg 30deg 0.4m" max-camera-orbit="70deg 95deg 1.6m"
+    <model-viewer id="mv" alt="Fotogramma stradale steso in piano con i riquadri dei danni che si sollevano"
+      camera-controls touch-action="pan-y" camera-orbit="0deg 55deg 0.85m" autoplay field-of-view="32deg"
+      min-camera-orbit="-180deg 10deg 0.35m" max-camera-orbit="180deg 85deg 1.6m"
       shadow-intensity="1" exposure="1.1" environment-image="neutral" tone-mapping="neutral"
       ar ar-modes="webxr scene-viewer quick-look" ar-placement="floor" ar-scale="auto">
       <button slot="ar-button" class="arbtn">Vedi sul tavolo</button>
@@ -53,7 +53,7 @@ model-viewer{width:100%;height:100%}
     <span class="hint">Trascina per ruotare · pizzica per lo zoom</span>
   </div>
   <div class="how">
-    <span><b>Dal telefono:</b> tocca "Vedi sul tavolo", inquadra il piano e i pannelli compaiono in scala reale (circa 60 cm di larghezza, alti 17 cm).</span>
+    <span><b>Dal telefono:</b> tocca "Vedi sul tavolo", inquadra il piano e la foto compare stesa sul tavolo (circa 60 × 31 cm); pizzica per ingrandirla o rimpicciolirla.</span>
     <span><b>Da computer:</b> la visione in realtà aumentata non è disponibile, ma puoi ruotare la scena.</span>
   </div>
 </main>
@@ -65,7 +65,7 @@ async function load(name){
   try{
     if(!cache[name]){
       // sul vostro sito: file .glb diretto (serve all'AR); nell'anteprima: copia impacchettata in .json
-      const url=name+".glb?v=3";const h=await fetch(url,{method:"HEAD",cache:"no-store"}).catch(()=>null);
+      const url=name+".glb?v=4";const h=await fetch(url,{method:"HEAD",cache:"no-store"}).catch(()=>null);
       if(h&&h.ok&&!(h.headers.get("content-type")||"").includes("html")) cache[name]=url;
       else{const j=await (await fetch(name+".glb.json")).json();
         const bin=Uint8Array.from(atob(j.b64),c=>c.charCodeAt(0));
@@ -78,7 +78,7 @@ document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",(
   document.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",x===b));
   load(b.dataset.m);
 }));
-load("prima_dopo_residenziale");
+load("tavolo_residenziale");
 </script>
 
 </body>
