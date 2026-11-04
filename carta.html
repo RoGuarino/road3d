@@ -77,11 +77,12 @@ function labelTexture(text, sub, color){
 }
 
 // costruisce i riquadri di un fotogramma nello spazio del bersaglio (larghezza stampa = 1)
+const labels = [];
 function buildFrame(f){
   const root = new THREE.Group(), groups = [];
   const X = px => px / f.w - 0.5, Y = py => (f.h / 2 - py) / f.w;
   const dets = [...f.dets].sort((a, b) => (a.b[0] + a.b[2]) - (b.b[0] + b.b[2]));
-  const H = [0.07, 0.115, 0.16];
+  const H = [0.06, 0.11, 0.16];
   dets.forEach((d, i) => {
     const color = d.sign ? SIGN : (COLORS[d.c] || "#cccccc");
     const mat = new THREE.MeshBasicMaterial({ color });
@@ -104,10 +105,11 @@ function buildFrame(f){
     const sub = d.sign ? `cartello  ${Math.round(d.s * 100)}%` : (d.v ? `severità ${d.v}` : "");
     const text = d.sign ? d.c : `${d.c}  ${d.s.toFixed(2)}`;
     const L = labelTexture(text, sub, color);
-    const lh = sub ? 0.034 : 0.022, lw = lh * L.aspect;
-    const lab = new THREE.Mesh(new THREE.PlaneGeometry(lw, lh), new THREE.MeshBasicMaterial({ map: L.tex, side: THREE.DoubleSide }));
-    const holder = new THREE.Group(); holder.position.z = hgt; holder.rotation.x = THREE.MathUtils.degToRad(70);
-    lab.position.y = lh / 2; holder.add(lab); g.add(holder);
+    const lh = sub ? 0.046 : 0.03, lw = lh * L.aspect;
+    const lab = new THREE.Mesh(new THREE.PlaneGeometry(lw, lh),
+      new THREE.MeshBasicMaterial({ map: L.tex, side: THREE.DoubleSide, depthTest: false }));
+    lab.renderOrder = 10;                       // sempre sopra foto e cornici
+    lab.position.z = hgt + lh * 0.55; g.add(lab); labels.push(lab);
     g.scale.setScalar(0.001);
     root.add(g); groups.push({ g, delay: 0.5 + i * 0.18 });
   });
@@ -136,6 +138,7 @@ async function start(){
     return fr;
   });
   let current = null;
+  const camPos = new THREE.Vector3();
   $("replay").onclick = () => current && play(current);
   try {
     await mind.start();
@@ -152,6 +155,8 @@ async function start(){
       const t = performance.now() / 1000 - anim.t0;
       anim.fr.groups.forEach(o => o.g.scale.setScalar(Math.max(0.001, ease((t - o.delay) / 0.55))));
     }
+    camera.getWorldPosition(camPos);
+    labels.forEach(l => l.lookAt(camPos));     // etichette sempre rivolte al telefono
     renderer.render(scene, camera);
   });
 }
