@@ -77,7 +77,6 @@ function labelTexture(text, sub, color){
 }
 
 // costruisce i riquadri di un fotogramma nello spazio del bersaglio (larghezza stampa = 1)
-const labels = [];
 function buildFrame(f){
   const root = new THREE.Group(), groups = [];
   const X = px => px / f.w - 0.5, Y = py => (f.h / 2 - py) / f.w;
@@ -106,10 +105,11 @@ function buildFrame(f){
     const text = d.sign ? d.c : `${d.c}  ${d.s.toFixed(2)}`;
     const L = labelTexture(text, sub, color);
     const lh = sub ? 0.046 : 0.03, lw = lh * L.aspect;
-    const lab = new THREE.Mesh(new THREE.PlaneGeometry(lw, lh),
-      new THREE.MeshBasicMaterial({ map: L.tex, side: THREE.DoubleSide, depthTest: false }));
-    lab.renderOrder = 10;                       // sempre sopra foto e cornici
-    lab.position.z = hgt + lh * 0.55; g.add(lab); labels.push(lab);
+    // sprite: sempre dritto e frontale rispetto allo schermo
+    const lab = new THREE.Sprite(new THREE.SpriteMaterial({ map: L.tex, depthTest: false, sizeAttenuation: true }));
+    lab.center.set(0.5, 0); lab.scale.set(lw, lh, 1);
+    lab.renderOrder = 10;
+    lab.position.z = hgt; g.add(lab);
     g.scale.setScalar(0.001);
     root.add(g); groups.push({ g, delay: 0.5 + i * 0.18 });
   });
@@ -131,14 +131,13 @@ async function start(){
     anchor.group.add(fr.root);
     anchor.onTargetFound = () => {
       $("hint").hidden = true; $("replay").hidden = false; current = fr;
-      $("info").innerHTML = `<b>${f.title}</b><span>Road score ${f.score} · ${f.date} · ${f.lat.toFixed(5)}, ${f.lon.toFixed(5)}</span>`;
+      $("info").innerHTML = `<b>${f.title}</b><span>Road score ${f.score} · ${f.date} · ${f.lat.toFixed(5)}, ${f.lon.toFixed(5)} · v3</span>`;
       if (!fr.played){ fr.played = true; play(fr); }
     };
     anchor.onTargetLost = () => { $("hint").hidden = false; };
     return fr;
   });
   let current = null;
-  const camPos = new THREE.Vector3();
   $("replay").onclick = () => current && play(current);
   try {
     await mind.start();
@@ -149,14 +148,12 @@ async function start(){
     return;
   }
   $("intro").hidden = true; $("hud").hidden = false; $("hint").hidden = false;
-  $("info").innerHTML = `<b>Road Analyzer</b><span>Inquadra una delle stampe A3</span>`;
+  $("info").innerHTML = `<b>Road Analyzer</b><span>Inquadra una delle stampe A3 · v3</span>`;
   renderer.setAnimationLoop(() => {
     if (anim){
       const t = performance.now() / 1000 - anim.t0;
       anim.fr.groups.forEach(o => o.g.scale.setScalar(Math.max(0.001, ease((t - o.delay) / 0.55))));
     }
-    camera.getWorldPosition(camPos);
-    labels.forEach(l => l.lookAt(camPos));     // etichette sempre rivolte al telefono
     renderer.render(scene, camera);
   });
 }
