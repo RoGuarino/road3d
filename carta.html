@@ -107,12 +107,13 @@ function buildFrame(f){
     const hgt = 0.05;
     const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.0022, 0.0022, hgt, 8), mat);
     stem.rotation.x = Math.PI / 2; stem.position.z = hgt / 2; g.add(stem);
-    // etichetta grande (sprite: sempre dritta verso lo schermo), mostrata solo per il danno in evidenza
+    // etichetta distesa in orizzontale, parallela alla stampa, sospesa sopra lo stelo
     const L = labelTexture(shortName(d), subLine(d), color);
-    const lh = 0.12, lw = lh * L.aspect;
-    const lab = new THREE.Sprite(new THREE.SpriteMaterial({ map: L.tex, depthTest: false }));
-    lab.center.set(0.5, 0); lab.scale.set(lw, lh, 1); lab.renderOrder = 10;
-    lab.position.z = hgt; lab.visible = false; g.add(lab);
+    const lh = 0.06, lw = lh * L.aspect;
+    const lab = new THREE.Mesh(new THREE.PlaneGeometry(lw, lh),
+      new THREE.MeshBasicMaterial({ map: L.tex, depthTest: false, side: THREE.DoubleSide }));
+    lab.renderOrder = 10;
+    lab.position.set(0, lh / 2, hgt); lab.visible = false; g.add(lab);
     g.scale.setScalar(0.001);
     root.add(g); groups.push({ g, lab, d, color, delay: 0.5 + i * 0.18 });
   });
@@ -146,7 +147,7 @@ async function start(){
     anchor.group.add(fr.root);
     anchor.onTargetFound = () => {
       $("hint").hidden = true; $("replay").hidden = false; current = fr;
-      $("meta").innerHTML = `<span>${f.title} · road score ${f.score} · ${f.date} · ${f.lat.toFixed(5)}, ${f.lon.toFixed(5)} · v4</span>`;
+      $("meta").innerHTML = `<span>${f.title} · road score ${f.score} · ${f.date} · ${f.lat.toFixed(5)}, ${f.lon.toFixed(5)} · v5</span>`;
       if (!fr.played){ fr.played = true; play(fr); }
       else if (focus.fr !== fr){ focus = { fr, i: -1, next: 0, hold: 0 }; }
     };
@@ -170,7 +171,7 @@ async function start(){
     return;
   }
   $("intro").hidden = true; $("hud").hidden = false; $("hint").hidden = false;
-  $("meta").innerHTML = `<b>Road Analyzer</b><span>Inquadra una delle stampe A3 · v4</span>`;
+  $("meta").innerHTML = `<b>Road Analyzer</b><span>Inquadra una delle stampe A3 · v5</span>`;
   renderer.setAnimationLoop(() => {
     if (anim){
       const t = performance.now() / 1000 - anim.t0;
