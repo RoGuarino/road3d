@@ -65,8 +65,8 @@ async function load(name){
   try{
     if(!cache[name]){
       // sul vostro sito: file .glb diretto (serve all'AR); nell'anteprima: copia impacchettata in .json
-      const h=await fetch(name+".glb",{method:"HEAD"}).catch(()=>null);
-      if(h&&h.ok&&!(h.headers.get("content-type")||"").includes("html")) cache[name]=name+".glb";
+      const url=name+".glb?v=3";const h=await fetch(url,{method:"HEAD",cache:"no-store"}).catch(()=>null);
+      if(h&&h.ok&&!(h.headers.get("content-type")||"").includes("html")) cache[name]=url;
       else{const j=await (await fetch(name+".glb.json")).json();
         const bin=Uint8Array.from(atob(j.b64),c=>c.charCodeAt(0));
         cache[name]=URL.createObjectURL(new Blob([bin],{type:"model/gltf-binary"}));}
